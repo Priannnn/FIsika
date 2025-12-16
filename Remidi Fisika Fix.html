@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulator Gerak Parabola</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        p {
+            text-align: center;
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        input[type="number"] {
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            background: #ffffff;
+            color: #2d3748;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .value-display {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+        
+        canvas {
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto 20px;
+            background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 100%);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 30px;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+        
+        #startBtn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        #startBtn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        #startBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        #pauseBtn {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(74, 85, 104, 0.4);
+        }
+        
+        #pauseBtn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 85, 104, 0.6);
+        }
+        
+        #pauseBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        #resetBtn {
+            background: linear-gradient(135deg, #f56565 0%, #c53030 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 101, 101, 0.4);
+        }
+        
+        #resetBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 101, 101, 0.6);
+        }
+        
+        .info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            line-height: 1.8;
+        }
+        
+        .info span {
+            display: inline-block;
+            margin: 5px 10px;
+            padding: 8px 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            font-size: 14px;
+        }
+        
+        .info b {
+            color: #667eea;
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+            
+            canvas {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Simulator Gerak Parabola</h1>
+        <p>Wahyu Priantiko</p>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>Kecepatan awal (m/s)</label>
+                <input type="number" id="speedInput" value="10" min="1" max="200">
+            </div>
+            <div class="control-group">
+                <label>Sudut (derajat)</label>
+                <input type="number" id="angleInput" value="30" min="0" max="89">
+            </div>
+            <div class="control-group">
+                <label>Gravitasi (m/s²)</label>
+                <input type="number" id="gravityInput" value="10" step="0.1" min="0.1" max="30">
+            </div>
+
+            <div class="control-group" style="display:none;">
+                <label>Skala jarak (px/m)</label>
+                <input type="number" id="scaleInput" value="2" step="1" min="1" max="30">
+            </div>
+
+            <div class="control-group">
+                <label>Massa (kg)</label>
+                <input type="number" id="massInput" value="1" step="0.1" min="0.1">
+            </div>
+        </div>
+
+        <canvas id="simCanvas" width="800" height="400"></canvas>
+        
+        <div class="button-group">
+            <button id="startBtn">Start ▶</button>
+            <button id="pauseBtn" disabled>Pause ⏸</button>
+            <button id="resetBtn">Reset ⟲</button>
+        </div>
+
+        <div class="info" id="infoText">
+            Masukkan parameter, lalu klik <b>Start</b> buat lihat lintasan proyektil.
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const inputkec = document.getElementById('speedInput');
+        const inputdrjt = document.getElementById('angleInput');
+        const inputgrav = document.getElementById('gravityInput');
+        const scaleInput = document.getElementById('scaleInput');
+        const inputmassa = document.getElementById('massInput');
+
+        const start = document.getElementById('startBtn');
+        const pause = document.getElementById('pauseBtn');
+        const reset = document.getElementById('resetBtn');
+        const infotext = document.getElementById('infoText');
+
+        let animationId = null;
+        let running = false;
+        let paused = false;
+
+        // variabel fisika
+        let x, y, V0x, V0y, g, scale, t;
+        const dt = 0.02;
+        let pathPoints = [];
+        let tinggimax = 0;
+        const h0 = 0;
+
+        function resetSim() 
+        {
+            cancelAnimationFrame(animationId);
+            animationId = null;
+            running = false;
+            paused = false;
+
+            x = 0;
+            y = h0;
+            t = 0;
+            pathPoints = [];
+            tinggimax = y;
+
+            drawScene();
+
+            start.disabled = false;
+            pause.disabled = true;
+            pause.textContent = 'Pause ⏸';
+
+            infotext.innerHTML = 'Masukkan parameter, lalu klik <b>Start</b> buat lihat lintasan proyektil.';
+        }
+
+        function initPhysics() 
+        {
+            const v0 = Number(inputkec.value) || 0;
+            const angleDeg = Number(inputdrjt.value) || 0;
+            g = Number(inputgrav.value) || 9.8;
+            scale = Number(scaleInput.value) || 0;
+
+            const mass = Number(inputmassa.value) || 1;
+
+            const theta = angleDeg * Math.PI / 180;
+            V0x = v0 * Math.cos(theta);
+            V0y = v0 * Math.sin(theta);
+
+            x = 0;
+            y = h0;
+            t = 0;
+            pathPoints = [];
+            tinggimax = y;
+
+            // Rumus tanpa drag, h0=0 (massa tidak mempengaruhi hasil)
+            const T = (2 * V0y) / g;
+            const R = (v0 * v0 * Math.sin(2 * theta)) / g;
+            const hMax = (V0y * V0y) / (2 * g);
+
+           infotext.innerHTML =
+                `<span>Waktu di udara: <b>${T.toFixed(2)} s</b></span>` +
+                `<span>Jarak jangkauan (R): <b>${R.toFixed(2)} m</b></span>` +
+                `<span>Tinggi maksimum: <b>${hMax.toFixed(2)} m</b></span>` +
+                `<span>V0x : <b>${V0x.toFixed(2)} m/s</b></span>` +
+                `<span>V0y : <b>${V0y.toFixed(2)} m/s</b></span>`;
+
+                
+        }
+
+        function worldToScreen(xWorld, yWorld) 
+        {
+            const xScreen = 40 + xWorld * scale;
+            const yScreen = canvas.height - 30 - yWorld * scale;
+            return { x: xScreen, y: yScreen };
+        }
+
+        function drawGround() 
+        {
+            ctx.strokeStyle = '#4b5563';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            const yGround = canvas.height - 30;
+            ctx.moveTo(0, yGround);
+            ctx.lineTo(canvas.width, yGround);
+            ctx.stroke();
+
+            ctx.fillStyle = '#111827';
+            ctx.fillRect(0, yGround, canvas.width, canvas.height - yGround);
+        }
+
+        function drawAxes() 
+        {
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(40, 10);
+            ctx.lineTo(40, canvas.height - 30);
+            ctx.moveTo(40, canvas.height - 30);
+            ctx.lineTo(canvas.width - 10, canvas.height - 30);
+            ctx.stroke();
+        }
+
+        function drawPath()
+        {
+            if (pathPoints.length < 2) return;
+            ctx.strokeStyle = '#22c55e';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let i = 0; i < pathPoints.length; i++) 
+            {
+                const p = worldToScreen(pathPoints[i].x, pathPoints[i].y);
+                if (i === 0) ctx.moveTo(p.x, p.y);
+                else ctx.lineTo(p.x, p.y);
+            }
+            ctx.stroke();
+        }
+
+        function drawProjectile() 
+        {
+            const p = worldToScreen(x, y);
+            ctx.fillStyle = '#f97316';
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawScene() 
+        {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGround();
+            drawAxes();
+            drawPath();
+            drawProjectile();
+        }
+
+        function updatePhysics()
+        {
+            t += dt;
+
+            const ax = 0;
+            const ay = -g;
+
+            V0x = V0x + ax * dt;
+            V0y = V0y + ay * dt;
+
+            x = x + V0x * dt;
+            y = y + V0y * dt;
+
+            if (y < 0) y = 0;
+            if (y > tinggimax) tinggimax = y;
+
+            pathPoints.push({ x, y });
+        }
+
+        function loop() 
+        {
+            if (!running || paused) return;
+
+            updatePhysics();
+            drawScene();
+
+            if (y <= 0 && V0y <= 0 && t > 0.05) 
+            {
+                running = false;
+                start.disabled = false;
+                pause.disabled = true;
+
+                return;
+            }
+
+            animationId = requestAnimationFrame(loop)
+        }
+
+        start.addEventListener('click', () => 
+        {
+            if (!running) 
+            {
+                initPhysics();
+                running = true;
+                paused = false;
+                start.disabled = true;
+                pause.disabled = false;
+                pause.textContent = 'Pause ⏸';
+                loop();
+            } 
+            else if (running && paused) 
+            {
+                paused = false;
+                pause.textContent = 'Pause ⏸';
+                loop();
+            }
+        });
+
+        pause.addEventListener('click', () => 
+        {
+            if (!running) return;
+            paused = !paused;
+            if (paused) pause.textContent = 'Resume ▶';
+            else {
+                pause.textContent = 'Pause ⏸';
+                loop();
+            }
+        });
+
+        reset.addEventListener('click', resetSim);
+
+        resetSim();
+    </script>
+</body>
+</html>
